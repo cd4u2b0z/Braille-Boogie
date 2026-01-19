@@ -16,16 +16,6 @@
 
 ![Demo](assets/demo.gif)
 
-```
-    ⠀⣀⣀⠀
-   ⠀⣿⣿⣿⠀      
-   ⠀⠸⣿⠇⠀      
-   ⣴⣿⣿⣿⣦     
-  ⠀⠻⣿⣿⠟⠀      
-   ⠀⢸⣿⡇⠀
-   ⠀⢸⣿⡇⠀
-  ⠀⢀⣿⠁⣿⡀⠀
-```
 
 > *"The rhythm speaks. The terminal dances. Physics handles the rest."*
 
