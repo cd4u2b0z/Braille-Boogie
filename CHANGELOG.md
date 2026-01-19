@@ -7,6 +7,61 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## 󰱒 v2.4 - Polish & UX Pass (January 2026)
+
+### 󱐋 New Modules
+- **Control Bus** — Unified audio feature signals with attack/release envelope smoothing
+  - Core signals: energy, bass, mid, treble (0-1 normalized)
+  - Transient detection: onset signal from energy derivative
+  - Beat tracking: beat_phase, beat_hit impulse, on_beat/on_half_beat flags
+  - Derived signals: brightness, dynamics, bass_ratio, treble_ratio
+  - Silence detection with configurable threshold and debouncing
+  - Configurable smoothing presets (FAST, MEDIUM, SLOW, INSTANT)
+
+- **UI Reactivity** — Terminal-safe reactive UI elements using glyph density only
+  - Border pulse on beat (4 intensity levels: ─ ━ ▬ █)
+  - Energy meter bar with peak hold
+  - Beat phase indicator (animated ○◔◑◕●)
+  - Mini 3-band spectrum display (bass/mid/treble)
+  - BPM display with slow smoothing
+
+### 󰏫 Skeleton Improvements
+- **Knee Constraint System** — Prevents knock-kneed look during animation
+  - Defines centerline at hip center
+  - Left knee constrained left of center, right knee right of center
+  - Stance detection from beat_phase: [0-0.5]=left planted, [0.5-1]=right planted
+  - Planted leg has strict constraint, swinging leg is relaxed
+  - Bounce-back velocity reversal on constraint violation
+
+- **Body Bounds Tracking** — Real-time bounding box for particle exclusion
+  - `skeleton_dancer_get_bounds()` — normalized coordinates
+  - `skeleton_dancer_get_bounds_pixels()` — pixel coordinates
+  - Cached bounds updated every frame
+
+### 󱐋 Particle Enhancements
+- **Control Bus Driven Emission** — Particles respond to unified control signals
+  - `particles_emit_controlled()` — spawns based on onset + energy
+  - Count scales with onset + energy
+  - Spread radius scales with energy
+  - Velocity scales with onset
+  - Lifetime inversely scales with energy (fast decay at high energy)
+
+- **Outward Repulsion** — Particles pushed away from dancer center
+  - `particles_set_repulsion()` — configurable repulsion strength
+  - Particles actively avoid body center during movement
+  - Gentle outward drift for particles near body
+  - Default repulsion strength: 60.0
+
+### 󰏫 Technical
+- New files: `src/control/control_bus.h`, `src/control/control_bus.c`
+- New files: `src/ui/ui_reactive.h`, `src/ui/ui_reactive.c`
+- Updated: `src/braille/skeleton_dancer.c`, `src/braille/skeleton_dancer.h`
+- Updated: `src/effects/particles.c`, `src/effects/particles.h`
+- Makefile: V24_SRCS variable for new source files
+- Architecture: Separated concerns — audio → control bus → animation/effects/UI
+
+---
+
 ## 󰎔 v2.3 - Audio Upgrade (January 2026)
 
 ### 󱐋 New Features

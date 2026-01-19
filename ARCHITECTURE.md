@@ -1,6 +1,6 @@
 # 󰙵 Architecture
 
-Technical architecture documentation for ASCII Dancer v2.2.
+Technical architecture documentation for ASCII Dancer v2.4.
 
 ---
 
@@ -8,22 +8,35 @@ Technical architecture documentation for ASCII Dancer v2.2.
 
 ```
 ┌──────────────────────────────────────────────────────────────────┐
-│                        ASCII Dancer v2.2                          │
+│                        ASCII Dancer v2.4                          │
 ├──────────────────────────────────────────────────────────────────┤
-│  Audio Layer      FFT Layer       Animation       Render Layer   │
+│  Audio Layer      FFT Layer      Control Bus      Animation      │
 │  ┌──────────┐    ┌──────────┐    ┌──────────┐    ┌──────────┐   │
-│  │ PipeWire │───>│ cavacore │───>│ Skeleton │───>│  Braille │   │
-│  │  Pulse   │    │   FFT    │    │  Dancer  │    │  Canvas  │   │
+│  │ PipeWire │───>│ cavacore │───>│ Control  │───>│ Skeleton │   │
+│  │  Pulse   │    │   FFT    │    │   Bus    │    │  Dancer  │   │
 │  └──────────┘    └──────────┘    └──────────┘    └──────────┘   │
-│        │               │               │               │          │
-│        └───────────────┴───────────────┴───────────────┘          │
-│                              │                                    │
-│                    ┌─────────┴─────────┐                         │
-│                    │   Effects System   │                         │
-│                    │  Particles/Trails  │                         │
-│                    └───────────────────┘                         │
+│                                         │               │         │
+│                                         ├──────────>────┤         │
+│                                         │               │         │
+│                              ┌──────────┴────┐    ┌────┴──────┐  │
+│                              │  Particles    │    │    UI     │  │
+│                              │  Trails       │    │ Reactive  │  │
+│                              └───────────────┘    └───────────┘  │
+│                                         │               │         │
+│                                         └───────┬───────┘         │
+│                                                 │                 │
+│                                          ┌──────┴──────┐          │
+│                                          │   Braille   │          │
+│                                          │   Canvas    │          │
+│                                          └─────────────┘          │
 └──────────────────────────────────────────────────────────────────┘
 ```
+
+**v2.4 Architecture:**
+Audio → FFT → **Control Bus** → {Skeleton, Particles, UI}
+- **Control Bus**: Unified signals with envelope smoothing
+- **Separation of concerns**: Animation, effects, and UI all consume from bus
+- **Configurable smoothing**: Fast for dancer, medium for particles, slow for UI
 
 ---
 
@@ -36,24 +49,31 @@ src/
 ├── 󰎈 audio/                 # Audio capture
 │   ├── pipewire.c          # PipeWire stream
 │   ├── pulse.c             # PulseAudio capture
+│   ├── rhythm.c            # Beat detection (v2.3)
 │   └── common.c            # Shared utilities
 │
 ├── 󰓾 fft/                   # Frequency analysis
 │   └── cavacore.c          # FFT (from cava)
 │
+├── 󱓻 control/               # v2.4: Control bus
+│   └── control_bus.c       # Unified audio signals
+│
 ├── 󰕮 braille/               # Rendering
 │   ├── braille_canvas.c    # Pixel→braille
 │   ├── braille_dancer.c    # Interface
-│   └── skeleton_dancer.c   # Physics/poses
+│   └── skeleton_dancer.c   # Physics/poses/constraints
 │
 ├── 󱐋 effects/               # Visual effects
-│   ├── particles.c         # Particle system
+│   ├── particles.c         # Particle system + repulsion
 │   ├── trails.c            # Motion trails
 │   └── effects.c           # Manager
 │
 ├── 󰍹 render/                # Terminal output
 │   ├── render_new.c        # ncurses
 │   └── colors.c            # 256-color themes
+│
+├── 󰌌 ui/                    # v2.4: Reactive UI
+│   └── ui_reactive.c       # Border pulse, energy meter
 │
 └── 󰒓 config/                # Configuration
     └── config.c            # INI parser
@@ -232,12 +252,64 @@ fps = 60
 
 ---
 
+## � Control Bus (v2.4)
+
+**Unified Signal Architecture:**
+
+The control bus separates audio analysis from animation, providing normalized 0-1 signals with configurable attack/release smoothing.
+
+```c
+typedef struct {
+    SmoothedValue energy;    // RMS loudness
+    SmoothedValue bass;      // 20-300 Hz
+    SmoothedValue mid;       // 300-2000 Hz
+    SmoothedValue treble;    // 2000+ Hz
+    SmoothedValue onset;     // Transient detection
+    BeatState beat;          // Phase, hit, BPM
+} ControlBus;
+```
+
+**Attack/Release Envelope:**
+```c
+// Fast attack, slow release for natural dynamics
+coef = input > smoothed ? attack_coef : release_coef;
+smoothed += coef * (input - smoothed);
+```
+
+**Smoothing Presets:**
+| Preset | Attack | Release | Use Case |
+|--------|--------|---------|----------|
+| FAST | 5ms | 50ms | Dancer animation |
+| MEDIUM | 10ms | 100ms | Particle emission |
+| SLOW | 20ms | 200ms | UI display |
+| INSTANT | 0ms | 0ms | Debug/raw values |
+
+**Derived Signals:**
+- **brightness** = (mid × 0.5 + treble) / total
+- **dynamics** = √variance(energy history)
+- **bass_ratio** = bass / total
+- **treble_ratio** = treble / total
+
+---
+
 ## 󰘦 Key Algorithms
 
 ### Beat Detection
 ```c
 if (bass > threshold && bass_velocity > min_velocity) {
     trigger_bass_hit();
+}
+```
+
+### Knee Constraint (v2.4)
+```c
+// Prevent knock-kneed look
+float cx = hip_center.x;
+bool left_planted = (beat_phase < 0.5f);
+
+if (knee_left.x > cx - knee_offset && left_planted) {
+    knee_left.x = cx - knee_offset;  // Force outward
+    velocity.x *= -0.3f;             // Bounce back
 }
 ```
 
@@ -257,3 +329,16 @@ velocity += force;
 velocity *= damping;
 position += velocity * dt;
 ```
+
+### Particle Repulsion (v2.4)
+```c
+// Push particles away from dancer center
+dx = particle.x - body_center.x;
+dy = particle.y - body_center.y;
+dist = sqrt(dx² + dy²);
+
+if (dist < body_radius) {
+    push_factor = (body_radius - dist) / body_radius;
+    particle.vx += (dx / dist) * repulsion * push_factor;
+    particle.vy += (dy / dist) * repulsion * push_factor;
+}

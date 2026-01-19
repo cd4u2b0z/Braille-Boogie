@@ -1,8 +1,10 @@
 <- {motion} = {motion} = Original work by Dr. Baklava • github.com/cd4u2b0z • 2026 -->
 
-#  ASCII Dancer
+#  ASCII Dancer v2.4
 
 **A terminal-based audio visualizer with a dancing Unicode Braille character that reacts to music in real-time.**
+
+**Latest:** Control bus architecture • UI reactivity • Knee constraints • Enhanced particles
 
 ![Linux](https://img.shields.io/badge/Linux-FCC624?style=flat&logo=linux&logoColor=black)
 ![C](https://img.shields.io/badge/C-A8B9CC?style=flat&logo=c&logoColor=black)

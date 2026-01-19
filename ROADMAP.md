@@ -4,9 +4,9 @@ Development roadmap and feature tracking for asciidancer.
 
 ---
 
-##  Current Status: v2.2.0
+##  Current Status: v2.4.0
 
-**Rating: 9.0/10** — Feature-rich visualizer with full effects system
+**Rating: 9.5/10** — Production-ready visualizer with control bus architecture
 
 ###  Completed Features
 - [x] 36 unique poses across 7 energy categories
@@ -26,6 +26,11 @@ Development roadmap and feature tracking for asciidancer.
 - [x] Particle system with physics
 - [x] Motion trails with fading
 - [x] Visual enhancements (breathing, floor vibe, shake)
+- [x] Control bus architecture with unified signals
+- [x] UI reactivity (border pulse, energy meter, beat indicator)
+- [x] Knee constraint system (prevents inward collapse)
+- [x] Body bounds tracking for particle exclusion
+- [x] Enhanced particle repulsion system
 
 ---
 
@@ -87,25 +92,36 @@ Development roadmap and feature tracking for asciidancer.
 
 ---
 
-##  v2.4 — Polish & UX
+##  v2.4 — Polish & UX ✅
 
-**Goal: Professional feel**
+**Achieved: 9.0 → 9.5** | Released 2026-01-18
 
-- [ ] **Help overlay** (`?` key)
-  - Semi-transparent control reference
-  - Current settings display
+- [x] **Control Bus architecture**
+  - Unified audio feature signals
+  - Attack/release envelope smoothing
+  - Derived signals (brightness, dynamics)
+  - Silence detection
 
-- [ ] **Audio source picker** (interactive menu)
-  - List available PipeWire/PulseAudio sources
-  - Select with arrow keys
+- [x] **UI Reactivity**
+  - Border pulse on beat
+  - Energy meter with peak hold
+  - Beat phase indicator animation
+  - Mini spectrum display
 
-- [ ] **Recording mode**
-  - Capture animation to ANSI escape file
-  - Playback without audio
+- [x] **Skeleton improvements**
+  - Knee constraint system (prevents knock-knees)
+  - Body bounds tracking for particle exclusion
+  - Beat-phase-based stance detection
 
-- [ ] **More themes**
-  - User-defined themes in config
-  - Theme preview mode
+- [x] **Particle enhancements**
+  - Control bus driven emission
+  - Outward repulsion from body center
+  - Dynamic spawn parameters based on audio
+
+- [ ] **Help overlay** (`?` key) — Deferred to v2.5
+- [ ] **Audio source picker** — Deferred to v2.5
+- [ ] **Recording mode** — Deferred to v3.0
+- [ ] **More themes** — Deferred to v2.5
 
 ---
 
