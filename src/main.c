@@ -608,14 +608,14 @@ int main(int argc, char *argv[]) {
 
         // Wait for next frame
         nanosleep(&frame_time, NULL);
+    }
+
     // v3.0+ cleanup
     if (recording && recorder) {
         frame_recorder_stop(recorder);
     }
     frame_recorder_destroy(recorder);
     profiler_destroy(profiler);
-    
-    }
 
     // Cleanup
     render_cleanup();

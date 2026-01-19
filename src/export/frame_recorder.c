@@ -19,12 +19,31 @@ static void ensure_directory(const char *path) {
 }
 
 FrameRecorder* frame_recorder_create(int width, int height, const char *output_dir) {
+    /* Validate dimensions */
+    if (width <= 0 || height <= 0) return NULL;
+    
     FrameRecorder *rec = calloc(1, sizeof(FrameRecorder));
     if (!rec) return NULL;
     
     rec->width = width;
     rec->height = height;
-    strncpy(rec->output_dir, output_dir, sizeof(rec->output_dir) - 1);
+    rec->recording = false;
+    rec->frame_number = 0;
+    rec->total_frames = 0;
+    
+    /* Use default directory if none provided */
+    const char *dir = output_dir;
+    if (!dir || dir[0] == '\0') {
+        const char *home = getenv("HOME");
+        if (home) {
+            static char default_dir[512];
+            snprintf(default_dir, sizeof(default_dir), "%s/asciidancer_recordings", home);
+            dir = default_dir;
+        } else {
+            dir = "/tmp/asciidancer_recordings";
+        }
+    }
+    strncpy(rec->output_dir, dir, sizeof(rec->output_dir) - 1);
     
     /* Allocate frame buffer */
     rec->frame_buffer = calloc(height, sizeof(char*));
@@ -43,18 +62,22 @@ FrameRecorder* frame_recorder_create(int width, int height, const char *output_d
         }
     }
     
-    ensure_directory(output_dir);
+    ensure_directory(rec->output_dir);
     return rec;
 }
 
 void frame_recorder_destroy(FrameRecorder *recorder) {
     if (!recorder) return;
     
-    if (recorder->frame_buffer) {
+    if (recorder->frame_buffer && recorder->height > 0) {
         for (int i = 0; i < recorder->height; i++) {
-            free(recorder->frame_buffer[i]);
+            if (recorder->frame_buffer[i]) {
+                free(recorder->frame_buffer[i]);
+                recorder->frame_buffer[i] = NULL;
+            }
         }
         free(recorder->frame_buffer);
+        recorder->frame_buffer = NULL;
     }
     
     free(recorder);
