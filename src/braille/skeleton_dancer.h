@@ -216,6 +216,7 @@ void skeleton_dancer_destroy(SkeletonDancer *dancer);
 void skeleton_dancer_update(SkeletonDancer *dancer, 
                             float bass, float mid, float treble,
                             float dt);
+void skeleton_dancer_update_with_phase(SkeletonDancer *dancer, float bass, float mid, float treble, float dt, float beat_phase, float bpm);
 
 /* ============ Rendering ============ */
 void skeleton_dancer_render(SkeletonDancer *dancer, BrailleCanvas *canvas);

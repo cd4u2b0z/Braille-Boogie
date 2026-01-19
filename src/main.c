@@ -16,6 +16,7 @@
 #include "render/render.h"
 #include "render/colors.h"
 #include "config/config.h"
+#include "audio/rhythm.h"
 
 // Default configuration
 #define DEFAULT_RATE 44100
@@ -242,6 +243,10 @@ int main(int argc, char *argv[]) {
     struct dancer_state dancer;
     dancer_init(&dancer);
 
+    // Initialize rhythm detection (v2.3)
+    RhythmState *rhythm = rhythm_init();
+    float spectrum[NUM_BARS];  // Spectrum buffer for rhythm analysis
+
     // Initialize ncurses with 256-color support
     if (render_init() != 0) {
         fprintf(stderr, "Failed to initialize ncurses\n");
@@ -291,12 +296,25 @@ int main(int argc, char *argv[]) {
             if (cava_out[i] > 1.0) cava_out[i] = 1.0;
         }
 
+        // Convert to float spectrum for rhythm analysis
+        for (int i = 0; i < NUM_BARS; i++) {
+            spectrum[i] = (float)cava_out[i];
+        }
+
+        // Update rhythm detection (v2.3)
+        rhythm_update(rhythm, spectrum, NUM_BARS, 1.0 / target_fps);
+
         // Calculate frequency bands
         double bass, mid, treble;
         calculate_bands(cava_out, NUM_BARS, &bass, &mid, &treble);
 
         // Update dancer animation
-        dancer_update(&dancer, bass, mid, treble);
+        // Update dancer with rhythm info (v2.3)
+        dancer_update_with_rhythm(&dancer, bass, mid, treble,
+                                  rhythm_get_phase(rhythm),
+                                  rhythm_get_bpm(rhythm),
+                                  rhythm_onset_detected(rhythm),
+                                  rhythm_get_onset_strength(rhythm));
 
         // Render
         render_clear();
@@ -304,8 +322,9 @@ int main(int argc, char *argv[]) {
         render_bars(bass, mid, treble);
 
         snprintf(info_text, sizeof(info_text),
-                 "sens:%.1f %s %s%s%s%s%s p:%d | %s",
+                 "sens:%.1f %.0fbpm %s %s%s%s%s%s p:%d | %s",
                  sensitivity,
+                 rhythm_get_bpm(rhythm),
                  theme_names[cfg.theme],
                  show_ground ? "[G]" : "",
                  show_shadow ? "[R]" : "",
@@ -380,6 +399,7 @@ int main(int argc, char *argv[]) {
 
     cava_destroy(plan);
     dancer_cleanup();
+    rhythm_destroy(rhythm);
     free(cava_out);
     free(audio.source);
     free(audio.cava_in);

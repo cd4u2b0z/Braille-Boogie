@@ -36,3 +36,13 @@ bool dancer_get_trails(void);
 bool dancer_get_breathing(void);
 
 int dancer_get_particle_count(void);
+
+// Rhythm-aware update (v2.3) - pass beat phase and BPM for tighter sync
+void dancer_update_with_rhythm(struct dancer_state *state,
+                               double bass, double mid, double treble,
+                               float beat_phase, float bpm,
+                               bool onset_detected, float onset_strength);
+
+// Get current rhythm info
+float dancer_get_beat_phase(void);
+float dancer_get_bpm(void);

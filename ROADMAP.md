@@ -62,21 +62,21 @@ Development roadmap and feature tracking for asciidancer.
 
 ---
 
-##  v2.3 — Audio Upgrade
+##  v2.3 — Audio Upgrade ✅
 
 **Goal: Tighter rhythm response**
 
-- [ ] **Spectral flux onset detection**
+- [x] **Spectral flux onset detection**
   - Calculate spectral difference between frames
   - Detect actual note/beat onsets
   - Reduce false positives from sustained notes
 
-- [ ] **Autocorrelation BPM refinement**
+- [x] **Autocorrelation BPM refinement**
   - More accurate BPM calculation
   - Handle tempo changes
   - Sub-beat timing
 
-- [ ] **Beat phase tracking**
+- [x] **Beat phase tracking**
   - Lock to beat phase, not just detection
   - Anticipate upcoming beats
   - Smoother rhythm synchronization

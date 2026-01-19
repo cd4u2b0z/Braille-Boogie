@@ -19,7 +19,8 @@ COMMON_SRCS = src/main.c \
               src/render/render_new.c \
               src/effects/particles.c \
               src/effects/trails.c \
-              src/effects/effects.c
+              src/effects/effects.c \
+              src/audio/rhythm.c
 
 # Frame-based dancer (uses your custom braille frames)
 FRAME_SRCS = src/dancer/dancer_rhythm.c

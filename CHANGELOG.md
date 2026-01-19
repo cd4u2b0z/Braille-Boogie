@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## 󰎔 v2.3 - Audio Upgrade (January 2026)
+
+### 󱐋 New Features
+- **Spectral flux onset detection** - more accurate beat detection
+- **BPM estimation** - autocorrelation-based tempo tracking
+- **Beat phase tracking** - anticipate beats, lock to rhythm
+- **Enhanced frequency bands** - sub-bass, low-mid, high-mid
+
+### 󰏫 Improvements  
+- Tighter rhythm response in animations
+- Beat-locked pose transitions
+- Phase-synced modifiers (bounce, sway)
+- Reduced smoothing for snappier movements
+- BPM display in status bar
+
+---
+
 ## [2.2.0] - 2026-01-18
 
 ###  Added

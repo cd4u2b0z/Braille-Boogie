@@ -34,6 +34,12 @@ static float treble_velocity = 0;
 static float bass_threshold = 0.3f;
 static float treble_threshold = 0.25f;
 
+/* Rhythm tracking (v2.3) */
+static float current_beat_phase = 0.0f;
+static float current_bpm = 120.0f;
+static bool rhythm_onset = false;
+static float rhythm_onset_strength = 0.0f;
+
 /* Pixel dimensions */
 static int pixel_width = 0;
 static int pixel_height = 0;
@@ -259,4 +265,37 @@ void calculate_bands(double *cava_out, int num_bars,
     if (*bass > 1.0) *bass = 1.0;
     if (*mid > 1.0) *mid = 1.0;
     if (*treble > 1.0) *treble = 1.0;
+}
+
+/* === Rhythm-aware update (v2.3) === */
+
+void dancer_update_with_rhythm(struct dancer_state *state, 
+                               double bass, double mid, double treble,
+                               float beat_phase, float bpm, 
+                               bool onset_detected, float onset_strength) {
+    current_beat_phase = beat_phase;
+    current_bpm = bpm;
+    rhythm_onset = onset_detected;
+    rhythm_onset_strength = onset_strength;
+    
+    /* Fall back to standard update */
+    dancer_update(state, bass, mid, treble);
+    
+    /* Override phase with beat phase for tighter sync */
+    if (skeleton) {
+        skeleton_dancer_update_with_phase(skeleton, 
+                                          (float)state->bass_intensity,
+                                          (float)state->mid_intensity,
+                                          (float)state->treble_intensity,
+                                          0.0167f, beat_phase, bpm);
+        state->phase = skeleton->phase;
+    }
+}
+
+float dancer_get_beat_phase(void) {
+    return current_beat_phase;
+}
+
+float dancer_get_bpm(void) {
+    return current_bpm;
 }
