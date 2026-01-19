@@ -135,6 +135,22 @@ make debug     # Build with debug symbols (-g -O0)
 make clean     # Remove build artifacts
 ```
 
+### 󰍉 Code Quality
+
+```bash
+# Static analysis (requires cppcheck)
+cppcheck --enable=all --suppress=missingIncludeSystem -I./src src/
+
+# Build with all warnings
+make CFLAGS+="-Werror" braille
+```
+
+- ✓ Zero compiler warnings (`-Wall -Wextra`)
+- ✓ cppcheck clean (no critical/high issues)
+- ✓ const-correct APIs
+- ✓ NULL-safe allocations
+- ✓ Proper static linkage for internal functions
+
 **macOS Notes:**
 - Uses CoreAudio for audio capture (automatic detection)
 - May require Xcode Command Line Tools: `xcode-select --install`

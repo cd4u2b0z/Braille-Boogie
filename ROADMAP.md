@@ -69,7 +69,14 @@ Development roadmap and feature tracking for asciidancer.
 - [x] **Centralized constants** — New `constants.h` with ~150 tuning parameters
 - [x] **Scanline flood fill** — Bounded O(4096) memory vs previous O(width*height)
 
-### 󰆍 Build System (v3.2.3)
+### � Static Analysis (v3.2.4)
+- [x] **cppcheck clean** — Zero critical/high issues
+- [x] **NULL safety** — malloc() return values checked
+- [x] **const correctness** — 15+ functions with `const` pointer params
+- [x] **static linkage** — 20+ internal functions properly scoped
+- [x] **Shadow variables** — Eliminated inner scope name collisions
+
+### �󰆍 Build System (v3.2.3)
 - [x] **Version strings** — Git version, hash, and build date embedded via $(shell ...)
 - [x] **Make targets** — Added help, info, run, debug phony targets
 - [x] **Developer workflow** — make run builds and runs, make debug launches gdb

@@ -5,7 +5,28 @@ All notable changes to ASCII Dancer will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## 󰆍 v3.2.3 - Build System Improvements (January 2026)
+## � v3.2.4 - Static Analysis Cleanup (January 2026)
+
+### 󱪚 Critical Fixes
+- **NULL pointer safety** — cavacore.c malloc() now checked before dereference
+- **Shadow variable fix** — main.c sw/sh renamed to avoid inner scope shadowing
+
+### 󰧹 Const Correctness
+- **15+ functions** updated with `const` pointer parameters
+- Files: cavacore, particles, trails, frame_recorder, help_overlay, profiler, skeleton_dancer, config
+
+### 󰒓 Static Linkage
+- **20+ internal functions** marked `static` to reduce symbol table pollution
+- Forward declarations added where needed
+- Removed static functions from public headers
+
+### 󱁤 cppcheck Clean
+- Zero critical/high issues remaining
+- Build passes `cppcheck --enable=all` with only style warnings in legacy code
+
+---
+
+## �󰆍 v3.2.3 - Build System Improvements (January 2026)
 
 ### 󰆍 Makefile Enhancements
 - **Version embedding** — VERSION, GIT_HASH, BUILD_DATE via $(shell ...) in binary

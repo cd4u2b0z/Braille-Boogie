@@ -40,6 +40,12 @@ Audio → FFT → **Control Bus** → {Skeleton, Particles, Background FX, UI}
 - **228 Poses**: 13 categories including 6 genre-specific dance styles
 - **Configurable smoothing**: Fast for dancer, medium for particles, slow for UI
 
+**v3.2.4 Code Quality:**
+- **cppcheck clean**: Zero critical/high static analysis issues
+- **const correctness**: Read-only pointers properly marked `const`
+- **static linkage**: Internal functions scoped to translation units
+- **NULL safety**: All malloc() returns checked before use
+
 ---
 
 ## 󰉋 Directory Structure
