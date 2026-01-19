@@ -5,6 +5,45 @@ All notable changes to ASCII Dancer will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.0] - 2026-01-19
+
+### Added
+- **🎨 256-Color Theme System** - Rich visual customization
+  - 7 built-in themes: Default, Fire, Ice, Neon, Matrix, Synthwave, Mono
+  - 10-step color gradients based on energy level
+  - Theme cycling with `t` key during playback
+  - `--theme <name>` CLI option
+
+- **⚙️ Configuration System** - Persistent settings via INI files
+  - Auto-loads from `~/.config/asciidancer/config.ini`
+  - Sections: [audio], [visual], [terminal], [animation], [debug]
+  - `--config <file>` CLI option for custom config paths
+  - `config_create_default()` generates sample config
+
+- **🌍 Ground Line & Shadow** - Enhanced visual depth
+  - Horizontal ground line at dancer's feet
+  - Shadow/reflection effect (inverted, faded dancer below ground)
+  - Toggle ground with `g` key, shadow with `r` key
+  - `--no-ground` and `--no-shadow` CLI options
+
+- **📐 Adaptive Terminal Scaling** - Dynamic resize handling
+  - SIGWINCH handler for terminal resize detection
+  - Automatic canvas rescaling to fit new dimensions
+  - Maintains aspect ratio during resize
+
+### Changed
+- Render system refactored for 256-color support
+- Main loop updated with config integration
+- Help output now shows theme list with emoji indicators
+
+### Technical
+- New files: `src/config/config.h`, `src/config/config.c`
+- New files: `src/render/colors.h`, `src/render/colors.c`
+- Updated: `src/render/render_new.c`, `src/render/render.h`, `src/main.c`
+- Uses xterm 256-color palette (color cube + grayscale ramp)
+
+---
+
 ## [2.0.0] - 2026-01-18
 
 ### Added
@@ -53,6 +92,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.0.0] - 2026-01-18
+
 ## [1.0.0] - 2026-01-18
 
 ### Added
@@ -69,6 +110,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.0.0] - 2026-01-18
+
 ## Attribution
 
 This project uses code from:
@@ -81,5 +124,7 @@ This project uses code from:
 Special thanks to **Karl Stavestrand** and all cava contributors for their excellent work on audio visualization.
 
 ---
+
+## [2.0.0] - 2026-01-18
 
 <sub>Original work by **Dr. Baklava** • [github.com/cd4u2b0z](https://github.com/cd4u2b0z) • 2026</sub>

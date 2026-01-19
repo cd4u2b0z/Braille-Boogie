@@ -1,5 +1,6 @@
 // ASCII Dancer - Terminal Audio Visualizer
 // Main entry point and event loop
+// v2.1: Config file, 256-color themes, ground/shadow
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -13,17 +14,19 @@
 #include "fft/cavacore.h"
 #include "dancer/dancer.h"
 #include "render/render.h"
+#include "render/colors.h"
+#include "config/config.h"
 
 // Default configuration
 #define DEFAULT_RATE 44100
 #define DEFAULT_CHANNELS 2
 #define DEFAULT_FORMAT 16
-#define DEFAULT_FPS 60
 #define NUM_BARS 24  // More bars for better frequency resolution
 
 // Global state for signal handling
 static volatile int running = 1;
 static struct audio_data audio;
+static Config cfg;
 
 static void signal_handler(int sig) {
     (void)sig;
@@ -37,34 +40,67 @@ static void print_usage(const char *name) {
 #ifdef PIPEWIRE
     printf("  -p, --pulse           Use PulseAudio instead of PipeWire\n");
 #endif
-    printf("  -f, --fps <n>         Target framerate (default: 60)\n");
+    printf("  -f, --fps <n>         Target framerate (default: %d)\n", cfg.target_fps);
+    printf("  -t, --theme <name>    Color theme: default, fire, ice, neon, matrix, synthwave, mono\n");
+    printf("  -c, --config <file>   Config file path (default: ~/.config/asciidancer/config.ini)\n");
+    printf("      --no-ground       Disable ground line\n");
+    printf("      --no-shadow       Disable shadow/reflection\n");
     printf("  -h, --help            Show this help\n");
     printf("\n");
     printf("Controls:\n");
     printf("  q, ESC                Quit\n");
     printf("  +/-                   Adjust sensitivity\n");
+    printf("  t                     Cycle through themes\n");
+    printf("  g                     Toggle ground line\n");
+    printf("  r                     Toggle reflection/shadow\n");
+    printf("\n");
+    printf("Themes:\n");
+    for (int i = 0; i <= THEME_MONO; i++) {
+        printf("  %s\n", colors_get_theme_preview((ColorTheme)i));
+    }
+}
+
+static void cycle_theme(void) {
+    cfg.theme = (cfg.theme + 1) % (THEME_MONO + 1);
+    render_set_theme(cfg.theme);
 }
 
 int main(int argc, char *argv[]) {
-    // Default options
-    char *source = "auto";
+    // Initialize config with defaults
+    config_init(&cfg);
+    
+    // Load config file if exists
+    char *config_path = config_get_default_path();
+    if (config_path) {
+        config_load(&cfg, config_path);
+    }
+    
+    // Command line overrides
+    char *source = cfg.audio_source;
     int use_pulse = 0;
-    int target_fps = DEFAULT_FPS;
+    int target_fps = cfg.target_fps;
+    int show_ground = cfg.show_ground;
+    int show_shadow = cfg.show_shadow;
 
     // Parse command line
     static struct option long_options[] = {
-        {"source", required_argument, 0, 's'},
-        {"pulse",  no_argument,       0, 'p'},
-        {"fps",    required_argument, 0, 'f'},
-        {"help",   no_argument,       0, 'h'},
+        {"source",    required_argument, 0, 's'},
+        {"pulse",     no_argument,       0, 'p'},
+        {"fps",       required_argument, 0, 'f'},
+        {"theme",     required_argument, 0, 't'},
+        {"config",    required_argument, 0, 'c'},
+        {"no-ground", no_argument,       0, 'G'},
+        {"no-shadow", no_argument,       0, 'S'},
+        {"help",      no_argument,       0, 'h'},
         {0, 0, 0, 0}
     };
 
     int opt;
-    while ((opt = getopt_long(argc, argv, "s:pf:h", long_options, NULL)) != -1) {
+    while ((opt = getopt_long(argc, argv, "s:pf:t:c:h", long_options, NULL)) != -1) {
         switch (opt) {
         case 's':
             source = optarg;
+            strncpy(cfg.audio_source, source, sizeof(cfg.audio_source) - 1);
             break;
         case 'p':
             use_pulse = 1;
@@ -75,6 +111,21 @@ int main(int argc, char *argv[]) {
                 fprintf(stderr, "FPS must be between 1 and 120\n");
                 return 1;
             }
+            cfg.target_fps = target_fps;
+            break;
+        case 't':
+            cfg.theme = config_theme_from_name(optarg);
+            break;
+        case 'c':
+            config_load(&cfg, optarg);
+            break;
+        case 'G':
+            show_ground = 0;
+            cfg.show_ground = 0;
+            break;
+        case 'S':
+            show_shadow = 0;
+            cfg.show_shadow = 0;
             break;
         case 'h':
             print_usage(argv[0]);
@@ -188,7 +239,7 @@ int main(int argc, char *argv[]) {
     struct dancer_state dancer;
     dancer_init(&dancer);
 
-    // Initialize ncurses
+    // Initialize ncurses with 256-color support
     if (render_init() != 0) {
         fprintf(stderr, "Failed to initialize ncurses\n");
         audio.terminate = 1;
@@ -200,15 +251,25 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
+    // Apply config settings
+    render_set_theme(cfg.theme);
+    render_set_ground(show_ground);
+    render_set_shadow(show_shadow);
+
     // Main loop timing
     struct timespec frame_time = {
         .tv_sec = 0,
         .tv_nsec = 1000000000 / target_fps
     };
 
-    double sensitivity = 1.0;
+    double sensitivity = cfg.sensitivity;
     char info_text[256];
-    int debug_mode = 0;  // Toggle with 'd' key
+    int debug_mode = 0;
+
+    // Theme names for display
+    const char *theme_names[] = {
+        "default", "fire", "ice", "neon", "matrix", "synthwave", "mono"
+    };
 
     // Main loop
     while (running && !audio.terminate) {
@@ -240,10 +301,12 @@ int main(int argc, char *argv[]) {
         render_bars(bass, mid, treble);
 
         snprintf(info_text, sizeof(info_text),
-                 "q=quit  +/-=sens(%.1f)  d=debug  |  %s  |  B:%.2f M:%.2f T:%.2f",
+                 "q=quit +/-=sens(%.1f) t=theme(%s) g=ground r=shadow %s%s | %s",
                  sensitivity,
-                 use_pulse ? "PulseAudio" : "PipeWire",
-                 bass, mid, treble);
+                 theme_names[cfg.theme],
+                 show_ground ? "[G]" : "",
+                 show_shadow ? "[R]" : "",
+                 use_pulse ? "PulseAudio" : "PipeWire");
         render_info(info_text);
         render_refresh();
 
@@ -264,6 +327,20 @@ int main(int argc, char *argv[]) {
         case '_':
             sensitivity /= 1.2;
             if (sensitivity < 0.1) sensitivity = 0.1;
+            break;
+        case 't':
+        case 'T':
+            cycle_theme();
+            break;
+        case 'g':
+        case 'G':
+            show_ground = !show_ground;
+            render_set_ground(show_ground);
+            break;
+        case 'r':
+        case 'R':
+            show_shadow = !show_shadow;
+            render_set_shadow(show_shadow);
             break;
         case 'd':
         case 'D':

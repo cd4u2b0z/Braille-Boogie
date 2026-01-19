@@ -1,5 +1,5 @@
-# ASCII Dancer Makefile
-# Supports both frame-based and braille skeleton dancers
+# ASCII Dancer Makefile v2.1
+# Supports config files, 256-color themes, ground/shadow effects
 
 CC = gcc
 CFLAGS = -Wall -Wextra -O2 -g -I./src
@@ -10,10 +10,12 @@ PIPEWIRE_LIBS := $(shell pkg-config --libs libpipewire-0.3 2>/dev/null)
 PULSE_CFLAGS := $(shell pkg-config --cflags libpulse-simple 2>/dev/null)
 PULSE_LIBS := $(shell pkg-config --libs libpulse-simple libpulse 2>/dev/null)
 
-# Common source files
+# Common source files (v2.1 additions: config, colors)
 COMMON_SRCS = src/main.c \
               src/audio/common.c \
               src/fft/cavacore.c \
+              src/config/config.c \
+              src/render/colors.c \
               src/render/render_new.c
 
 # Frame-based dancer (uses your custom braille frames)
@@ -48,7 +50,7 @@ TARGET = asciidancer
 BRAILLE_ALL_SRCS = $(COMMON_SRCS) $(BRAILLE_SRCS) $(AUDIO_SRCS)
 BRAILLE_OBJS = $(BRAILLE_ALL_SRCS:.c=.o)
 
-.PHONY: all braille clean
+.PHONY: all braille clean install
 
 # Build frame-based dancer (default)
 all: $(TARGET)
@@ -68,3 +70,9 @@ clean-objs:
 
 clean: clean-objs
 	rm -f $(TARGET)
+
+# Install to ~/.local/bin
+install: $(TARGET)
+	mkdir -p ~/.local/bin
+	cp $(TARGET) ~/.local/bin/
+	@echo "Installed to ~/.local/bin/$(TARGET)"
