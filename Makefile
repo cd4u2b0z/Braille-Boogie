@@ -34,6 +34,12 @@ V30_SRCS = src/audio/bpm_tracker.c \
            src/audio/energy_analyzer.c \
            src/effects/background_fx.c
 
+# v3.0+: Export, audio picker, terminal caps, profiler
+V30P_SRCS = src/export/frame_recorder.c \
+            src/audio/audio_picker.c \
+            src/ui/term_caps.c \
+            src/ui/profiler.c
+
 # Frame-based dancer (uses your custom braille frames)
 FRAME_SRCS = src/dancer/dancer_rhythm.c
 
@@ -62,8 +68,8 @@ SRCS = $(COMMON_SRCS) $(FRAME_SRCS) $(AUDIO_SRCS)
 OBJS = $(SRCS:.c=.o)
 TARGET = asciidancer
 
-# Braille target sources (includes v2.4 and v3.0 modules)
-BRAILLE_ALL_SRCS = $(COMMON_SRCS) $(BRAILLE_SRCS) $(V24_SRCS) $(V30_SRCS) $(AUDIO_SRCS)
+# Braille target sources (includes v2.4, v3.0, and v3.0+ modules)
+BRAILLE_ALL_SRCS = $(COMMON_SRCS) $(BRAILLE_SRCS) $(V24_SRCS) $(V30_SRCS) $(V30P_SRCS) $(AUDIO_SRCS)
 BRAILLE_OBJS = $(BRAILLE_ALL_SRCS:.c=.o)
 
 .PHONY: all braille clean install
