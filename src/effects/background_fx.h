@@ -142,25 +142,18 @@ void background_fx_update_dancer_pos(BackgroundFX *fx, int x, int y);
 /* ============ Effect Generators ============ */
 
 /* Generate ambient floating particles */
-void background_fx_generate_ambient(BackgroundFX *fx);
 
 /* Generate spectral wave pulse */
-void background_fx_generate_wave(BackgroundFX *fx, float energy);
 
 /* Generate energy aura around dancer */
-void background_fx_generate_aura(BackgroundFX *fx, float energy);
 
 /* Generate beat burst explosion */
-void background_fx_generate_burst(BackgroundFX *fx, float energy);
 
 /* Generate frequency ribbons */
-void background_fx_generate_ribbons(BackgroundFX *fx);
 
 /* Generate particle rain */
-void background_fx_generate_rain(BackgroundFX *fx);
 
 /* Generate spiral vortex */
-void background_fx_generate_vortex(BackgroundFX *fx);
 
 /* ============ Queries ============ */
 

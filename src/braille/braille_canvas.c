@@ -95,7 +95,7 @@ void braille_canvas_render(BrailleCanvas *canvas) {
     }
 }
 
-const wchar_t* braille_canvas_get_row(BrailleCanvas *canvas, int row) {
+static const wchar_t* braille_canvas_get_row(BrailleCanvas *canvas, int row) {
     if (!canvas || row < 0 || row >= canvas->cell_height) return NULL;
     return &canvas->cells[row * canvas->cell_width];
 }
@@ -145,7 +145,7 @@ void braille_set_pixel(BrailleCanvas *canvas, int x, int y, bool on) {
     mark_dirty(canvas, x, y);
 }
 
-bool braille_get_pixel(BrailleCanvas *canvas, int x, int y) {
+static bool braille_get_pixel(BrailleCanvas *canvas, int x, int y) {
     if (!canvas || !in_bounds(canvas, x, y)) return false;
     return canvas->pixels[pixel_index(canvas, x, y)] != 0;
 }

@@ -57,7 +57,6 @@ void braille_canvas_clear(BrailleCanvas *canvas);
 void braille_canvas_render(BrailleCanvas *canvas);
 
 /* Get the rendered braille string for a row (null-terminated) */
-const wchar_t* braille_canvas_get_row(BrailleCanvas *canvas, int row);
 
 /* Get UTF-8 encoded output for ncurses */
 int braille_canvas_to_utf8(BrailleCanvas *canvas, int row, char *out, int max_len);
@@ -68,7 +67,6 @@ int braille_canvas_to_utf8(BrailleCanvas *canvas, int row, char *out, int max_le
 void braille_set_pixel(BrailleCanvas *canvas, int x, int y, bool on);
 
 /* Get pixel value */
-bool braille_get_pixel(BrailleCanvas *canvas, int x, int y);
 
 /* Toggle pixel */
 void braille_toggle_pixel(BrailleCanvas *canvas, int x, int y);

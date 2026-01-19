@@ -19,7 +19,7 @@ float ease_in_out_quad(float t) {
     return t < 0.5f ? 2.0f * t * t : 1.0f - powf(-2.0f * t + 2.0f, 2.0f) / 2.0f;
 }
 
-float ease_in_out_cubic(float t) {
+static float ease_in_out_cubic(float t) {
     return t < 0.5f ? 4.0f * t * t * t : 1.0f - powf(-2.0f * t + 2.0f, 3.0f) / 2.0f;
 }
 
@@ -69,7 +69,7 @@ static int random_int(SkeletonDancer *d, int max) {
 
 /* ============ Joint Interpolation ============ */
 
-Joint joint_lerp(Joint a, Joint b, float t) {
+static Joint joint_lerp(Joint a, Joint b, float t) {
     return (Joint){a.x + (b.x - a.x) * t, a.y + (b.y - a.y) * t};
 }
 
@@ -3058,7 +3058,7 @@ void skeleton_dancer_update_with_phase(SkeletonDancer *d,
 
 /* ============ Body Bounds Accessors (v2.4) ============ */
 
-void skeleton_dancer_get_bounds(SkeletonDancer *d,
+void skeleton_dancer_get_bounds(const SkeletonDancer *d,
                                 float *center_x, float *center_y,
                                 float *top_y, float *bottom_y,
                                 float *left_x, float *right_x) {
@@ -3071,7 +3071,7 @@ void skeleton_dancer_get_bounds(SkeletonDancer *d,
     if (right_x) *right_x = d->body_right_x;
 }
 
-void skeleton_dancer_get_bounds_pixels(SkeletonDancer *d,
+void skeleton_dancer_get_bounds_pixels(const SkeletonDancer *d,
                                        int *center_x, int *center_y,
                                        int *top_y, int *bottom_y,
                                        int *left_x, int *right_x) {
@@ -3123,12 +3123,12 @@ float skeleton_dancer_get_effective_energy(SkeletonDancer *d) {
     return effective;
 }
 
-bool skeleton_dancer_is_energy_locked(SkeletonDancer *d) {
+bool skeleton_dancer_is_energy_locked(const SkeletonDancer *d) {
     if (!d) return false;
     return d->energy_locked;
 }
 
-float skeleton_dancer_get_energy_override(SkeletonDancer *d) {
+float skeleton_dancer_get_energy_override(const SkeletonDancer *d) {
     if (!d) return 0.0f;
     return d->energy_override;
 }
@@ -3146,7 +3146,7 @@ void skeleton_dancer_trigger_spin(SkeletonDancer *d, int direction) {
     if (d->spin_momentum < -12.56f) d->spin_momentum = -12.56f;
 }
 
-float skeleton_dancer_get_facing(SkeletonDancer *d) {
+float skeleton_dancer_get_facing(const SkeletonDancer *d) {
     if (!d) return 0.0f;
     return d->facing;
 }

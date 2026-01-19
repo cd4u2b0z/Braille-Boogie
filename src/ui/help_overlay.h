@@ -37,8 +37,8 @@ void help_overlay_show(HelpOverlay *help);
 void help_overlay_hide(HelpOverlay *help);
 
 /* Check if currently visible or animating */
-bool help_overlay_is_visible(HelpOverlay *help);
-bool help_overlay_is_active(HelpOverlay *help);  /* visible or fading */
+bool help_overlay_is_visible(const HelpOverlay *help);
+bool help_overlay_is_active(const HelpOverlay *help);  /* visible or fading */
 
 /* Scroll content (for long help) */
 void help_overlay_scroll(HelpOverlay *help, int delta);
@@ -50,7 +50,7 @@ void help_overlay_update(HelpOverlay *help, float dt);
 
 /* Render help overlay to ncurses
  * Parameters for dynamic status display */
-void help_overlay_render(HelpOverlay *help,
+void help_overlay_render(const HelpOverlay *help,
                          int screen_width, int screen_height,
                          const char *theme_name,
                          float bpm, float sensitivity,

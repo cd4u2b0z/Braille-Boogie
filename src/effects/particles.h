@@ -112,7 +112,7 @@ ParticleSystem* particles_create(int canvas_width, int canvas_height);
 void particles_destroy(ParticleSystem *ps);
 
 /* Spawn particles */
-void particles_spawn(ParticleSystem *ps, EmitterConfig *config, int count);
+void particles_spawn(ParticleSystem *ps, const EmitterConfig *config, int count);
 void particles_spawn_at(ParticleSystem *ps, float x, float y, 
                         SpawnPattern pattern, int count, float energy);
 

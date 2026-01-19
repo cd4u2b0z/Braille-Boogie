@@ -76,7 +76,7 @@ static int find_slot(ParticleSystem *ps) {
     return idx;
 }
 
-void particles_spawn(ParticleSystem *ps, EmitterConfig *config, int count) {
+void particles_spawn(ParticleSystem *ps, const EmitterConfig *config, int count) {
     if (!ps || !ps->enabled || !config) return;
     
     /* Cap spawning if we're at max active particles */

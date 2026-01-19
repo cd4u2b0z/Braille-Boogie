@@ -69,7 +69,7 @@ struct cava_plan *cava_init(int number_of_bars, unsigned int rate, int channels,
 // new_samples: number of new samples to process
 // cava_out: output buffer (size = number_of_bars)
 // plan: the plan struct from cava_init
-void cava_execute(double *cava_in, int new_samples, double *cava_out, struct cava_plan *plan);
+void cava_execute(const double *cava_in, int new_samples, double *cava_out, struct cava_plan *plan);
 
 // Cleanup and free resources
 void cava_destroy(struct cava_plan *plan);

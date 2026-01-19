@@ -8,6 +8,10 @@
 #include <string.h>
 #include <math.h>
 
+/* Forward declarations for static functions */
+static void trails_track_all_limbs(MotionTrails *trails);
+static void trails_clear(MotionTrails *trails);
+
 MotionTrails* trails_create(void) {
     MotionTrails *trails = calloc(1, sizeof(MotionTrails));
     if (!trails) return NULL;
@@ -29,7 +33,7 @@ void trails_destroy(MotionTrails *trails) {
     if (trails) free(trails);
 }
 
-void trails_set_tracked_joints(MotionTrails *trails, int *joint_ids, int count) {
+void trails_set_tracked_joints(MotionTrails *trails, const int *joint_ids, int count) {
     if (!trails) return;
     
     trails->num_tracked = (count < TRAIL_JOINTS) ? count : TRAIL_JOINTS;
@@ -38,7 +42,7 @@ void trails_set_tracked_joints(MotionTrails *trails, int *joint_ids, int count) 
     }
 }
 
-void trails_track_all_limbs(MotionTrails *trails) {
+static void trails_track_all_limbs(MotionTrails *trails) {
     if (!trails) return;
     
     /* Track: hands, feet, elbows, knees */
@@ -149,7 +153,7 @@ void trails_render(MotionTrails *trails, BrailleCanvas *canvas) {
     }
 }
 
-void trails_clear(MotionTrails *trails) {
+static void trails_clear(MotionTrails *trails) {
     if (!trails) return;
     
     for (int t = 0; t < TRAIL_JOINTS; t++) {

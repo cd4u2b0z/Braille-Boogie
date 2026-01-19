@@ -177,7 +177,7 @@ void frame_recorder_capture(FrameRecorder *recorder) {
     recorder->total_frames++;
 }
 
-void frame_recorder_get_stats(FrameRecorder *recorder, int *frames, double *duration) {
+void frame_recorder_get_stats(const FrameRecorder *recorder, int *frames, double *duration) {
     if (!recorder) return;
     if (frames) *frames = recorder->total_frames;
     if (duration) {

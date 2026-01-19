@@ -165,8 +165,8 @@ int config_load(Config *cfg, const char *path) {
         if (!eq) continue;
         
         *eq = '\0';
-        char *key = trim(trimmed);
-        char *value = trim(eq + 1);
+        const char *key = trim(trimmed);
+        const char *value = trim(eq + 1);
         
         /* Parse based on section */
         if (strcmp(section, "audio") == 0) {

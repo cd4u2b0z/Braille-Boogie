@@ -13,6 +13,9 @@
 struct cava_plan *cava_init(int number_of_bars, unsigned int rate, int channels, int autosens,
                             double noise_reduction, int low_cut_off, int high_cut_off) {
     struct cava_plan *p = malloc(sizeof(struct cava_plan));
+    if (!p) {
+        return NULL;  // Allocation failed
+    }
     p->status = 0;
 
     // Sanity checks
@@ -180,7 +183,7 @@ struct cava_plan *cava_init(int number_of_bars, unsigned int rate, int channels,
     return p;
 }
 
-void cava_execute(double *cava_in, int new_samples, double *cava_out, struct cava_plan *p) {
+void cava_execute(const double *cava_in, int new_samples, double *cava_out, struct cava_plan *p) {
     // Handle overflow
     if (new_samples > p->input_buffer_size) {
         new_samples = p->input_buffer_size;

@@ -60,8 +60,7 @@ MotionTrails* trails_create(void);
 void trails_destroy(MotionTrails *trails);
 
 /* Configure which joints to track */
-void trails_set_tracked_joints(MotionTrails *trails, int *joint_ids, int count);
-void trails_track_all_limbs(MotionTrails *trails);  /* Default: hands, feet, head */
+void trails_set_tracked_joints(MotionTrails *trails, const int *joint_ids, int count);
 
 /* Update with current joint positions */
 void trails_update(MotionTrails *trails, Joint *joints, int num_joints, float dt);
@@ -70,7 +69,6 @@ void trails_update(MotionTrails *trails, Joint *joints, int num_joints, float dt
 void trails_render(MotionTrails *trails, BrailleCanvas *canvas);
 
 /* Control */
-void trails_clear(MotionTrails *trails);
 void trails_set_enabled(MotionTrails *trails, bool enabled);
 bool trails_is_enabled(MotionTrails *trails);
 void trails_set_length(MotionTrails *trails, int length);

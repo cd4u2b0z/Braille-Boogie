@@ -85,11 +85,6 @@ void ui_reactive_update(UIReactive *ui,
 void ui_reactive_render(UIReactive *ui);
 
 /* Render individual elements (for custom layouts) */
-void ui_render_border(UIReactive *ui);
-void ui_render_energy_meter(UIReactive *ui, int x, int y, int width);
-void ui_render_beat_indicator(UIReactive *ui, int x, int y);
-void ui_render_bpm_display(UIReactive *ui, int x, int y);
-void ui_render_spectrum_mini(UIReactive *ui, int x, int y, int width);
 
 /* ============ Configuration ============ */
 

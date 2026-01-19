@@ -264,13 +264,13 @@ const Joint* skeleton_dancer_get_joints(SkeletonDancer *dancer);
 
 /* ============ Body Bounds (v2.4) ============ */
 /* Get body bounding box in normalized coordinates (0-1 range) */
-void skeleton_dancer_get_bounds(SkeletonDancer *dancer,
+void skeleton_dancer_get_bounds(const SkeletonDancer *dancer,
                                 float *center_x, float *center_y,
                                 float *top_y, float *bottom_y,
                                 float *left_x, float *right_x);
 
 /* Get body bounds in pixel coordinates */
-void skeleton_dancer_get_bounds_pixels(SkeletonDancer *dancer,
+void skeleton_dancer_get_bounds_pixels(const SkeletonDancer *dancer,
                                        int *center_x, int *center_y,
                                        int *top_y, int *bottom_y,
                                        int *left_x, int *right_x);
@@ -283,20 +283,18 @@ void skeleton_dancer_toggle_energy_lock(SkeletonDancer *dancer);
 /* Get effective energy (audio + override) */
 float skeleton_dancer_get_effective_energy(SkeletonDancer *dancer);
 /* Check if energy is locked */
-bool skeleton_dancer_is_energy_locked(SkeletonDancer *dancer);
+bool skeleton_dancer_is_energy_locked(const SkeletonDancer *dancer);
 /* Get energy boost/override values for UI display */
-float skeleton_dancer_get_energy_override(SkeletonDancer *dancer);
+float skeleton_dancer_get_energy_override(const SkeletonDancer *dancer);
 
 /* ============ v3.1: Facing/Spin Control ============ */
 /* Trigger a spin (direction: 1=clockwise, -1=counter-clockwise) */
 void skeleton_dancer_trigger_spin(SkeletonDancer *dancer, int direction);
 /* Get current facing angle */
-float skeleton_dancer_get_facing(SkeletonDancer *dancer);
+float skeleton_dancer_get_facing(const SkeletonDancer *dancer);
 
 /* ============ Utilities ============ */
 float ease_in_out_quad(float t);
-float ease_in_out_cubic(float t);
 float ease_in_out_elastic(float t);
-Joint joint_lerp(Joint a, Joint b, float t);
 
 #endif /* SKELETON_DANCER_H */

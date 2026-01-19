@@ -48,7 +48,7 @@ Profiler* profiler_create(void);
 void profiler_destroy(Profiler *prof);
 
 /* Start/end frame timing */
-void profiler_frame_start(Profiler *prof);
+void profiler_frame_start(const Profiler *prof);
 void profiler_frame_end(Profiler *prof);
 
 /* Time specific components */
@@ -67,6 +67,6 @@ bool profiler_is_enabled(Profiler *prof);
 void profiler_render(Profiler *prof);
 
 /* Get stats */
-void profiler_get_stats(Profiler *prof, double *fps, double *frame_ms);
+void profiler_get_stats(const Profiler *prof, double *fps, double *frame_ms);
 
 #endif /* PROFILER_H */

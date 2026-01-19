@@ -36,7 +36,7 @@ void profiler_destroy(Profiler *prof) {
 /* Thread-safe frame timing using atomic operations */
 static _Atomic double frame_start_time = 0.0;
 
-void profiler_frame_start(Profiler *prof) {
+void profiler_frame_start(const Profiler *prof) {
     if (!prof) return;
     atomic_store(&frame_start_time, get_time_ms());
 }
@@ -169,7 +169,7 @@ void profiler_render(Profiler *prof) {
     mvprintw(y + 16, x, " Press I to hide");
 }
 
-void profiler_get_stats(Profiler *prof, double *fps, double *frame_ms) {
+void profiler_get_stats(const Profiler *prof, double *fps, double *frame_ms) {
     if (!prof) return;
     if (fps) *fps = prof->fps_average;
     if (frame_ms) *frame_ms = prof->frame_time_avg_ms;

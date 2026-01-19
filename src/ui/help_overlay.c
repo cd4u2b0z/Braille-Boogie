@@ -96,11 +96,11 @@ void help_overlay_hide(HelpOverlay *help) {
     help->visible = false;
 }
 
-bool help_overlay_is_visible(HelpOverlay *help) {
+bool help_overlay_is_visible(const HelpOverlay *help) {
     return help && help->visible;
 }
 
-bool help_overlay_is_active(HelpOverlay *help) {
+bool help_overlay_is_active(const HelpOverlay *help) {
     return help && (help->visible || help->fade_alpha > 0.01f);
 }
 
@@ -148,7 +148,7 @@ static void render_centered(int y, int x, int width, const char *text) {
     mvprintw(y, x + pad, "%s", text);
 }
 
-void help_overlay_render(HelpOverlay *help,
+void help_overlay_render(const HelpOverlay *help,
                          int screen_width, int screen_height,
                          const char *theme_name,
                          float bpm, float sensitivity __attribute__((unused)),

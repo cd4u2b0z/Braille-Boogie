@@ -48,6 +48,6 @@ void frame_recorder_capture(FrameRecorder *recorder);
 void frame_recorder_export_text(FrameRecorder *recorder, const char *filename);
 
 /* Get recording stats */
-void frame_recorder_get_stats(FrameRecorder *recorder, int *frames, double *duration);
+void frame_recorder_get_stats(const FrameRecorder *recorder, int *frames, double *duration);
 
 #endif /* FRAME_RECORDER_H */

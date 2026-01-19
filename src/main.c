@@ -485,9 +485,9 @@ int main(int argc, char *argv[]) {
         // Update and render help overlay
         help_overlay_update(help, 1.0f / target_fps);
         if (help_overlay_is_active(help)) {
-            int sw, sh;
-            getmaxyx(stdscr, sh, sw);
-            help_overlay_render(help, sw, sh,
+            int help_sw, help_sh;
+            getmaxyx(stdscr, help_sh, help_sw);
+            help_overlay_render(help, help_sw, help_sh,
                               theme_names[cfg.theme],
                               bpm_tracker_get_bpm(bpm_tracker), sensitivity,
                               show_ground, show_shadow,

@@ -11,6 +11,15 @@
 #define M_PI 3.14159265358979323846
 #endif
 
+/* Forward declarations for static generator functions */
+static void background_fx_generate_ambient(BackgroundFX *fx);
+static void background_fx_generate_wave(BackgroundFX *fx, float energy);
+static void background_fx_generate_aura(BackgroundFX *fx, float energy);
+static void background_fx_generate_burst(BackgroundFX *fx, float energy);
+static void background_fx_generate_ribbons(BackgroundFX *fx);
+static void background_fx_generate_rain(BackgroundFX *fx);
+static void background_fx_generate_vortex(BackgroundFX *fx);
+
 /* ============ Private Helpers ============ */
 
 /* Create emitter config for ambient particles */
@@ -255,7 +264,7 @@ void background_fx_update_dancer_pos(BackgroundFX *fx, int x, int y) {
 
 /* ============ Effect Generators ============ */
 
-void background_fx_generate_ambient(BackgroundFX *fx) {
+static void background_fx_generate_ambient(BackgroundFX *fx) {
     if (!fx || !fx->particles) return;
     
     /* Spawn a few ambient particles per frame */
@@ -274,7 +283,7 @@ void background_fx_generate_ambient(BackgroundFX *fx) {
     }
 }
 
-void background_fx_generate_wave(BackgroundFX *fx, float energy __attribute__((unused))) {
+static void background_fx_generate_wave(BackgroundFX *fx, float energy __attribute__((unused))) {
     if (!fx || !fx->particles) return;
     
     /* Spawn wave particles from bottom of screen */
@@ -298,7 +307,7 @@ void background_fx_generate_wave(BackgroundFX *fx, float energy __attribute__((u
     }
 }
 
-void background_fx_generate_aura(BackgroundFX *fx, float energy) {
+static void background_fx_generate_aura(BackgroundFX *fx, float energy) {
     if (!fx || !fx->particles) return;
     
     /* Spawn particles in ring around dancer */
@@ -321,7 +330,7 @@ void background_fx_generate_aura(BackgroundFX *fx, float energy) {
     }
 }
 
-void background_fx_generate_burst(BackgroundFX *fx, float energy) {
+static void background_fx_generate_burst(BackgroundFX *fx, float energy) {
     if (!fx || !fx->particles) return;
     
     /* Explosion at dancer position */
@@ -332,7 +341,7 @@ void background_fx_generate_burst(BackgroundFX *fx, float energy) {
                              energy * fx->intensity);
 }
 
-void background_fx_generate_ribbons(BackgroundFX *fx) {
+static void background_fx_generate_ribbons(BackgroundFX *fx) {
     if (!fx || !fx->particles) return;
     
     /* Vertical frequency bars */
@@ -362,7 +371,7 @@ void background_fx_generate_ribbons(BackgroundFX *fx) {
     }
 }
 
-void background_fx_generate_rain(BackgroundFX *fx) {
+static void background_fx_generate_rain(BackgroundFX *fx) {
     if (!fx || !fx->particles) return;
     
     /* Spawn falling particles from top */
@@ -398,7 +407,7 @@ void background_fx_generate_rain(BackgroundFX *fx) {
     }
 }
 
-void background_fx_generate_vortex(BackgroundFX *fx) {
+static void background_fx_generate_vortex(BackgroundFX *fx) {
     if (!fx || !fx->particles) return;
     
     /* Spiral arms rotating around center */
