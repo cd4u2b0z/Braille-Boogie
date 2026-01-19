@@ -25,6 +25,12 @@
 #include "audio/energy_analyzer.h"
 #include "effects/background_fx.h"
 
+// v3.0+ modules
+#include "export/frame_recorder.h"
+#include "audio/audio_picker.h"
+#include "ui/term_caps.h"
+#include "ui/profiler.h"
+
 // Default configuration
 #define DEFAULT_RATE 44100
 #define DEFAULT_CHANNELS 2
@@ -53,6 +59,8 @@ static void print_usage(const char *name) {
     printf("  -c, --config <file>   Config file path (default: ~/.config/asciidancer/config.ini)\n");
     printf("      --no-ground       Disable ground line\n");
     printf("      --no-shadow       Disable shadow/reflection\n");
+    printf("      --pick-source     Show audio source picker menu\n");
+    printf("      --show-caps       Display terminal capabilities\n");
     printf("  -h, --help            Show this help\n");
     printf("\n");
     printf("Controls:\n");
@@ -65,6 +73,10 @@ static void print_usage(const char *name) {
     printf("  p                     Toggle particles\n");
     printf("  m                     Toggle motion trails\n");
     printf("  b                     Toggle breathing animation\n");
+    printf("  f                     Toggle background effects\n");
+    printf("  e                     Cycle background effect types\n");
+    printf("  x                     Toggle frame recording (export mode)\n");
+    printf("  i                     Toggle performance profiler overlay\n");
     printf("\n");
     printf("Themes:\n");
     for (int i = 0; i < THEME_COUNT; i++) {
@@ -75,6 +87,12 @@ static void print_usage(const char *name) {
 static void cycle_theme(void) {
     cfg.theme = (cfg.theme + 1) % THEME_COUNT;
     render_set_theme(cfg.theme);
+}
+
+static double get_time_ms(void) {
+    struct timespec ts;
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+    return ts.tv_sec * 1000.0 + ts.tv_nsec / 1000000.0;
 }
 
 int main(int argc, char *argv[]) {
@@ -96,16 +114,21 @@ int main(int argc, char *argv[]) {
 
     // Parse command line
     static struct option long_options[] = {
-        {"source",    required_argument, 0, 's'},
-        {"pulse",     no_argument,       0, 'p'},
-        {"fps",       required_argument, 0, 'f'},
-        {"theme",     required_argument, 0, 't'},
-        {"config",    required_argument, 0, 'c'},
-        {"no-ground", no_argument,       0, 'G'},
-        {"no-shadow", no_argument,       0, 'S'},
-        {"help",      no_argument,       0, 'h'},
+        {"source",      required_argument, 0, 's'},
+        {"pulse",       no_argument,       0, 'p'},
+        {"fps",         required_argument, 0, 'f'},
+        {"theme",       required_argument, 0, 't'},
+        {"config",      required_argument, 0, 'c'},
+        {"no-ground",   no_argument,       0, 'G'},
+        {"no-shadow",   no_argument,       0, 'S'},
+        {"pick-source", no_argument,       0, 'P'},
+        {"show-caps",   no_argument,       0, 'C'},
+        {"help",        no_argument,       0, 'h'},
         {0, 0, 0, 0}
     };
+
+    int show_picker = 0;
+    int show_caps = 0;
 
     int opt;
     while ((opt = getopt_long(argc, argv, "s:pf:t:c:h", long_options, NULL)) != -1) {
@@ -135,6 +158,12 @@ int main(int argc, char *argv[]) {
             show_ground = 0;
             cfg.show_ground = 0;
             break;
+        case 'P':
+            show_picker = 1;
+            break;
+        case 'C':
+            show_caps = 1;
+            break;
         case 'S':
             show_shadow = 0;
             cfg.show_shadow = 0;
@@ -153,6 +182,31 @@ int main(int argc, char *argv[]) {
     fprintf(stderr, "Error: No audio backend compiled in. Install libpipewire or libpulse dev packages.\n");
     return 1;
 #endif
+
+    // Show terminal capabilities if requested
+    if (show_caps) {
+        TerminalCaps *caps = term_caps_detect();
+        if (caps) {
+            term_caps_print(caps);
+            term_caps_free(caps);
+        }
+        return 0;
+    }
+
+    // Show audio source picker if requested
+    if (show_picker) {
+        AudioSourceList *sources = audio_picker_enumerate(use_pulse);
+        if (sources && sources->count > 0) {
+            char *selected = audio_picker_show_menu(sources);
+            if (selected) {
+                source = selected;
+                strncpy(cfg.audio_source, source, sizeof(cfg.audio_source) - 1);
+                printf("Selected source: %s\n", source);
+                // Note: selected is from sources struct, don't free it separately
+            }
+            audio_picker_free(sources);
+        }
+    }
 
 #ifndef PIPEWIRE
     if (!use_pulse) {
@@ -268,6 +322,18 @@ int main(int argc, char *argv[]) {
     BackgroundFXType current_bg_effect = BG_NONE;
     bool bg_fx_enabled = false;
 
+    // Initialize v3.0+ modules
+    int sw, sh;
+    getmaxyx(stdscr, sh, sw);
+    FrameRecorder *recorder = frame_recorder_create(sw, sh, NULL);  // NULL = use timestamp dir
+    bool recording = false;
+    
+    Profiler *profiler = profiler_create();
+    bool show_profiler = false;
+    
+    // Profiler timing
+    double audio_start = 0, update_start = 0, render_start = 0;
+
     // Initialize ncurses with 256-color support
     if (render_init() != 0) {
         fprintf(stderr, "Failed to initialize ncurses\n");
@@ -303,6 +369,12 @@ int main(int argc, char *argv[]) {
 
     // Main loop
     while (running && !audio.terminate) {
+        // Start profiler frame timing
+        if (show_profiler) {
+            profiler_frame_start(profiler);
+            audio_start = get_time_ms();
+        }
+
         // Process audio
         pthread_mutex_lock(&audio.lock);
         int samples_available = audio.samples_counter;
@@ -321,6 +393,12 @@ int main(int argc, char *argv[]) {
         // Convert to float spectrum for rhythm analysis
         for (int i = 0; i < NUM_BARS; i++) {
             spectrum[i] = (float)cava_out[i];
+        }
+
+        // Mark audio time
+        if (show_profiler) {
+            profiler_mark_audio(profiler, get_time_ms() - audio_start);
+            update_start = get_time_ms();
         }
 
         // Update rhythm detection (v2.3)
@@ -375,6 +453,12 @@ int main(int argc, char *argv[]) {
                                   rhythm_onset_detected(rhythm),
                                   rhythm_get_onset_strength(rhythm));
 
+        // Mark update time
+        if (show_profiler) {
+            profiler_mark_update(profiler, get_time_ms() - update_start);
+            render_start = get_time_ms();
+        }
+
         // Render
         render_clear();
         render_dancer(&dancer);
@@ -397,7 +481,7 @@ int main(int argc, char *argv[]) {
         const char *zone_name = energy_analyzer_get_zone_name(energy);
         float bpm_conf = bpm_tracker_get_confidence(bpm_tracker);
         snprintf(info_text, sizeof(info_text),
-                 "%.0fbpm(%d%%) %s %s %s%s%s%s%s%s p:%d",
+                 "%.0fbpm(%d%%) %s %s %s%s%s%s%s%s%s p:%d",
                  bpm_tracker_get_bpm(bpm_tracker),
                  (int)(bpm_conf * 100),
                  zone_name,
@@ -408,9 +492,28 @@ int main(int argc, char *argv[]) {
                  dancer_get_trails() ? "[M]" : "",
                  dancer_get_breathing() ? "[B]" : "",
                  bg_fx_enabled ? "[FX]" : "",
+                 recording ? "[REC]" : "",
                  dancer_get_particle_count());
         render_info(info_text);
+        
+        // Mark render time
+        if (show_profiler) {
+            profiler_mark_render(profiler, get_time_ms() - render_start);
+            profiler_frame_end(profiler);
+            
+            // Update counts and render
+            int particle_count = dancer_get_particle_count();
+            int trail_count = dancer_get_trails() ? 100 : 0;
+            profiler_set_counts(profiler, particle_count, trail_count);
+            profiler_render(profiler);
+        }
+        
         render_refresh();
+
+        // v3.0+: Capture frame if recording
+        if (recording && recorder) {
+            frame_recorder_capture(recorder);
+        }
 
         // Handle input
         int ch = render_getch();
@@ -474,6 +577,24 @@ int main(int argc, char *argv[]) {
                 }
             }
             break;
+        case 'x':
+        case 'X':
+            // v3.0+: Toggle frame recording
+            if (recorder) {
+                if (recording) {
+                    frame_recorder_stop(recorder);
+                    recording = false;
+                } else {
+                    frame_recorder_start(recorder);
+                    recording = true;
+                }
+            }
+            break;
+        case 'i':
+        case 'I':
+            // v3.0+: Toggle profiler
+            show_profiler = !show_profiler;
+            break;
         case 'd':
         case 'D':
             debug_mode = !debug_mode;
@@ -486,6 +607,13 @@ int main(int argc, char *argv[]) {
 
         // Wait for next frame
         nanosleep(&frame_time, NULL);
+    // v3.0+ cleanup
+    if (recording && recorder) {
+        frame_recorder_stop(recorder);
+    }
+    frame_recorder_destroy(recorder);
+    profiler_destroy(profiler);
+    
     }
 
     // Cleanup
